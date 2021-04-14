@@ -6,6 +6,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import axios from "axios";
 import AsyncStorage from "@react-native-community/async-storage";
 import Constants from '../constants/text';
+import * as Font from 'expo-font';
+
 export default function Login({ navigation }) {
     const [dataLoaded, setDataLoaded] = useState(false);
     const [email, onChangeemail] = useState('');

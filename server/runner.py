@@ -30,9 +30,9 @@ from os.path import join, dirname, realpath
 
 port = 5000
 # host = "192.168.43.95"
-host = "192.168.68.105"
+#host = "0.0.0.0"
+host = "192.168.1.4"
 # 192.168.68.103
-# 192.168.68.105
 app = Flask(__name__)
 
 app.config["MONGO_URI"] = "mongodb+srv://vignesh23:8oqq9WUNHGw2eSYo@jobcluster1.sal4m.mongodb.net/Swachh?retryWrites=true&w=majority"
@@ -105,7 +105,7 @@ def api_logout():
     del session['username']
     return jsonify({"status": "user logged out in succesffully"})
 
-
+@app.route("/", methods=['GET'])
 @app.route("/login", methods=['POST', 'GET'])
 def login():
 
@@ -119,10 +119,11 @@ def login():
             print(loginuser)
             if loginuser['user_type'] == 'admin':
                 print('\n\ntrue:')
-                session['admin_area'] = loginuser['user_area']
+                session['admin_area'] = loginuser['user_email']
+                print(session['admin_area'])
                 session['admin_login'] = True
                 grievance_all = list(mongo.db.grievance.find(
-                    {'assigned_authority': loginuser['user_area']}))
+                    {'assigned_authority': loginuser['user_email']}))
                 return redirect('/index')
             else:
                 CONTEXT_msg = 'Entered Username and password do not match. Please Retry!'
@@ -140,8 +141,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    del session['logged_in']
-    del session['username']
+
+    del session['admin_login']
+    del session['admin_area']
     return redirect('/login')
 
 
@@ -163,7 +165,7 @@ def predict(send_mail="no"):
             
             path = Path('./')
             
-            classes = ['garbage', 'pothole', 'sewage']
+            classes = ['Garbage', 'Pothole', 'Sewage']
             
             data = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=240).normalize(imagenet_stats)
             
@@ -175,11 +177,19 @@ def predict(send_mail="no"):
             pred_class, pred_idx, outputs = learn.predict(img)
             print(str(pred_class))
             
-          
+            if(str(pred_class) == "sewage"):
+                send_mail_to = "kunjshah45@gmail.com"
+            if(str(pred_class) == "garbage"):
+                send_mail_to = "kunjshah46@gmail.com"
+            if(str(pred_class) == "pothole"):
+                send_mail_to = "ramsuthar305@gmail.com"
             all1 = mongo.db.grievance.find_one_and_update({'grievance_id': i["grievance_id"]}, {
                 '$set': {"grievance_type": str(pred_class)}})
 
-          
+            if send_mail == "yes":
+
+                sendMail(send_mail_to, "New Grievance Received",
+                         "Your department has received a grievance. Please check your portel for details.")
             return "smd"
 
 
@@ -245,10 +255,10 @@ def uploader():
         return jsonify({"status": 'success', "message": "registered successfully!"})
 
 
-@app.route('/records')
-def records():
-    all = list(mongo.db.grievance.find())
-    return render_template('table.html', all=all)
+# @app.route('/records')
+# def records():
+#     all = list(mongo.db.grievance.find())
+#     return render_template('table.html', all=all)
 
 
 @app.route('/reports')
@@ -311,51 +321,31 @@ def getLocationDetails(latitude, longitude):
         'oT6JdnfeU8cnrcaqqRHSGzICgG6noykgly9Tz8PnXHE')
     response = gp.retrieve_addresses([latitude, longitude])
     response = str(response)
-    response = ast.literal_eval(response)
+    response = json.loads(response)
     response = response["items"][0]["address"]["label"]
-
     return response
-
-
-@app.route('/bar')
-def bar():
-    pincode = [11, 12, 11, 13, 15, 11, 16, 17]
-    tmp = set(pincode)
-    count = []
-    for i in tmp:
-        count.append(pincode.count(i))
-    tick_label = ['one', 'two', 'three', 'four', 'five', 'six']
-
-    pincode = list(tmp)
-    
-    plt.bar(pincode, count, tick_label=tick_label,
-            width=0.8, color=['red', 'green'])
-    plt.xlabel('Problems')
-    plt.ylabel('Area')
-    plt.title('Pincode')
-    # plt.savefig('/graphs'+str(datetime.now())+'.png')
-    return 'hii'
 
 
 @app.route("/index")
 def index():
-    grievance_all = list(mongo.db.grievance.find())
+    try:
+        if(session['admin_login']):
+            grievance_all = list(mongo.db.grievance.find())
 
-    for i in grievance_all:
-        print(i["area"])
-        if i['area'] == "unpredicted":
-            
-            longitude = float(i['longitude'])
-            latitude = float(i['latitude'])
-            res = getLocationDetails(latitude, longitude)
-           
-            
-          
-          
-            update_location = mongo.db.grievance.find_one_and_update(
-                {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
-        
-    return render_template('problems.html', all=grievance_all)
+            for i in grievance_all:
+                print(i["area"])
+                if i['area'] == "unpredicted":
+                    
+                    longitude = float(i['longitude'])
+                    latitude = float(i['latitude'])
+                    res = getLocationDetails(latitude, longitude)
+                    update_location = mongo.db.grievance.find_one_and_update(
+                        {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
+
+            return render_template('problems.html', all=grievance_all)
+    except Exception as e: 
+        CONTEXT_msg = ''
+        return render_template("loginpage.html", CONTEXT_msg=CONTEXT_msg)
 
 
 @app.route('/solve/<id1>')
@@ -368,7 +358,7 @@ def solve(id1):
 @app.route("/userspecific/<id>")
 def userspecific(id):
     grievance_all = list(mongo.db.grievance.find({"user_id": id}))
-    
+
     for i in grievance_all:
         if 'area' not in i or i['area'] == "unpredicted":
             longitude = float(i['longitude'])
@@ -376,10 +366,8 @@ def userspecific(id):
             res = getLocationDetails(latitude, longitude)
             update_location = mongo.db.grievance.find_one_and_update(
                 {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
-        print(i)
+
     return render_template('problems.html', all=grievance_all)
-
-
 
 @app.route("/sewage")
 def sewage():
@@ -431,8 +419,6 @@ def potholes():
             grievance_all = list(mongo.db.grievance.find(
                 {"grievance_type": "potholes"}))
     return render_template('problems.html', all=grievance_all)
-
-
 
 if __name__ == '__main__':
     app.run(host=host, port=port, debug=True)
