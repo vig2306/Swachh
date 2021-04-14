@@ -12,8 +12,7 @@ import os
 from datetime import datetime
 from flask_pymongo import PyMongo
 import re
-import smtplib
-import math
+import math,random
 import smtplib
 from werkzeug.utils import secure_filename
 from fastai.vision import *
@@ -26,7 +25,8 @@ from math import radians, cos, sin, asin, sqrt
 import herepy
 import ast
 from os.path import join, dirname, realpath
-
+from email.message import EmailMessage
+import smtplib
 
 port = 5000
 # host = "192.168.43.95"
@@ -71,7 +71,27 @@ def api_register():
         else:
             result = mongo.db.grievance_users.insert_one(data)
             return jsonify({"status": 'success', "message": "registered successfully!"})
-
+em = ''
+o = ''
+@app.route('/api/reset', methods=['POST'])
+def api_reset():
+    if request.method == 'POST':
+        data = request.get_data()
+        data = json.loads(data)
+        user_email = em
+        user_password = data["user_password"]
+        otp = data["otp"]
+        vr_user_password = data["vr_password"]
+        print(otp)
+        print(o)
+        if (otp == o and vr_user_password == user_password):
+            update_password = mongo.db.grievance_users.find_one_and_update(
+                {'user_email': user_email}, {'$set': {"user_password": user_password}},{'new':True})
+            print(update_password)
+            print("MAtched OTP")
+            return jsonify({"status": 'success', "message": "registered successfully!"})
+        else:
+            return jsonify({"status": 'failed', "message": "Enter valid OTP"})
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -98,6 +118,39 @@ def api_login():
             else:
                 return jsonify({"status": 'failed', "message": "invalid Credential!"})
 
+@app.route('/api/forget', methods=['POST'])
+def api_forget():
+    data = request.get_data()
+    data = json.loads(data)
+    user_name = data['user_email']
+    
+    loginuser = mongo.db.grievance_users.find_one({"$and": [{"$or": [{"user_email": user_name}, {
+        "user_phone": user_name}]}]})
+    print(loginuser,user_name)
+    print("!1")
+    if loginuser['user_type'] == 'general':
+        del loginuser["_id"]
+        digits = "0123456789"
+        OTP = ""
+        for i in range(4) :
+            OTP += digits[math.floor(random.random() * 10)]
+        global o
+        global em
+        o = str(OTP)
+        em = str(user_name)
+        EMAIL_ADDRESS = 'vs062300@gmail.com'
+        EMAIL_PASSWORD = 'qikpAx-keqgo3-guhmyr'
+        msg = EmailMessage()
+        msg['Subject'] = 'OTP is ' + str(OTP)
+        msg['To'] = user_name
+        msg['From'] = EMAIL_ADDRESS
+        msg.set_content('OTP is' + str(OTP))
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            smtp.send_message(msg)
+        return jsonify({"data": loginuser, "status": "user exists"})
+    else:
+        return jsonify({"status": 'failed', "message": "invalid Credential!"})
 
 @app.route('/api/logout', methods=['GET'])
 def api_logout():

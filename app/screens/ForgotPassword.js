@@ -8,24 +8,20 @@ import AsyncStorage from "@react-native-community/async-storage";
 import Constants from '../constants/text';
 import * as Font from 'expo-font';
 
-export default function Login({ navigation }) {
+export default function ForgotPassword({ navigation }) {
     const [dataLoaded, setDataLoaded] = useState(false);
     const [email, onChangeemail] = useState('');
     const [password, onChangePassword] = useState('');
     const [rememberMe, setrememberMe] = useState(false);
     const handleClick = () => setrememberMe(!rememberMe)
 
-
-
-
-    const login = async () => {
+    const forget = async () => {
         try {
             const data={
                 "user_email": email,
-                "user_password": password
             }
             axios
-                .post(`${Constants.ApiLink}/api/login`, data)
+                .post(`${Constants.ApiLink}/api/forget`, data)
                 .then(async function (response) {
                     // handle success
 
@@ -34,7 +30,7 @@ export default function Login({ navigation }) {
                         await AsyncStorage.setItem("userData", jsonValue);
                         console.log("data: " + jsonValue);
                         console.log("1");
-                        navigation.navigate('Home');
+                        navigation.navigate('ResetPassword');
                         //if else daalna hai
                     } catch (e) {
                         // saving error
@@ -58,15 +54,12 @@ export default function Login({ navigation }) {
 
         }
     }
-
-    const [Splash, setSplash] = useState(true)
-
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: "row" }}>
                 <Image source={require('../assets/images/logo.png')} style={styles.logo} />
             </View>
-            <Text style={styles.tagline}>Swachh</Text>
+            <Text style={styles.tagline}>Reset Password</Text>
             <View style={styles.form}>
                 <TextInput
                     style={styles.formInputs}
@@ -75,34 +68,14 @@ export default function Login({ navigation }) {
                     onChangeText={text => onChangeemail(text)}
                     value={email}
                 />
-                <TextInput
-                    style={styles.formInputs}
-                    placeholder="Your password"
-                    placeholderTextColor="#95a5a6"
-                    onChangeText={text => onChangePassword(text)}
-                    value={password}
-                    secureTextEntry={true}
-                />
-                <TouchableOpacity style={styles.formButton} onPress={login}>
+                <TouchableOpacity style={styles.formButton} onPress={forget}>
                     <View style={{ backgroundColor: "black", padding: "4%", borderRadius: 10 }}>
                         <FontAwesome5 name="arrow-right" size={20} color="white" />
                     </View>
                     <View style={{ padding: "4%", }}>
-                        <Text style={{ fontFamily: "Quicksand-Bold", fontSize: Dimensions.get('window').height / 40 }}>  Log in</Text>
+                        <Text style={{ fontFamily: "Quicksand-Bold", fontSize: Dimensions.get('window').height / 40 }}>  Send Email</Text>
                     </View>
                 </TouchableOpacity>
-
-                <View style={styles.textButtonsContainer}>
-                    <Text style={styles.labels}>Don't have an account?</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                        <Text style={styles.textButton}>Sign up</Text>
-                    </TouchableOpacity>
-                </View>
-                <View >
-                    <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                        <Text style={styles.labels}>Forgot password?</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         </View>
     );
