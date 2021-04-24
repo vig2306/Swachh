@@ -11,7 +11,8 @@ import Home from './screens/Home';
 import Register from './screens/register';
 import EntryRecords from './screens/entryRecord'
 import Profile from './screens/Profile'
-
+import ForgotPassword from './screens/ForgotPassword'
+import ResetPassword from './screens/ResetPassword'
 const AppNavigator = createStackNavigator({
   Login: {
     screen: Login,
@@ -48,7 +49,21 @@ const AppNavigator = createStackNavigator({
       title: 'Profile',
       headerShown: false
     }
-  }
+  },
+  ForgotPassword:{
+    screen: ForgotPassword,
+    navigationOptions:{
+      title: 'ForgotPassword',
+      headerShown: false
+    }
+  },
+  ResetPassword:{
+    screen: ResetPassword,
+    navigationOptions:{
+      title: 'ResetPassword',
+      headerShown: false
+    }
+  },
   
 },
 

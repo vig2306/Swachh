@@ -4,38 +4,38 @@ import { StyleSheet, Text, View, Image, TextInput, CheckBox, TouchableOpacity, S
 import { Dimensions } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons';
 import axios from "axios";
-import AsyncStorage from "@react-native-community/async-storage";
 import Constants from '../constants/text';
-import * as Font from 'expo-font';
-
-export default function Login({ navigation }) {
+export default function ResetPassword({ navigation }) {
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [phone, onChangephone] = useState('');
     const [email, onChangeemail] = useState('');
+    const [name, onChangeName] = useState('');
     const [password, onChangePassword] = useState('');
+    const [vr_password, onChangeVr_Password] = useState('');
     const [rememberMe, setrememberMe] = useState(false);
+    const [otp, setotp] = useState(false);
+
     const handleClick = () => setrememberMe(!rememberMe)
 
-
-
-
-    const login = async () => {
+    const reset = async () => {
         try {
-            const data={
-                "user_email": email,
-                "user_password": password
+            // Keep on showing the SlashScreen
+            const data = {
+                "otp":otp,
+                "user_password": password,
+                "vr_password": vr_password
             }
             axios
-                .post(`${Constants.ApiLink}/api/login`, data)
+                .post(`${Constants.ApiLink}/api/reset`, data)
                 .then(async function (response) {
                     // handle success
 
                     try {
                         const jsonValue = JSON.stringify(response.data);
-                        await AsyncStorage.setItem("userData", jsonValue);
+                        // await AsyncStorage.setItem("userData", jsonValue);
                         console.log("data: " + jsonValue);
                         console.log("1");
                         navigation.navigate('Home');
-                        //if else daalna hai
                     } catch (e) {
                         // saving error
                         console.log("Got error while storing data to async" + e);
@@ -49,7 +49,10 @@ export default function Login({ navigation }) {
                     // always executed
                 });
            
-            // await fetchFonts();
+
+
+            console.log(name, phone, password);
+            navigation.navigate('Home')
         } catch (e) {
             console.warn(e);
         } finally {
@@ -59,21 +62,21 @@ export default function Login({ navigation }) {
         }
     }
 
-    const [Splash, setSplash] = useState(true)
+
 
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: "row" }}>
                 <Image source={require('../assets/images/logo.png')} style={styles.logo} />
             </View>
-            <Text style={styles.tagline}>Swachh</Text>
+            <Text style={styles.tagline}>Reset Password</Text>
             <View style={styles.form}>
                 <TextInput
                     style={styles.formInputs}
-                    placeholder="Your email"
+                    placeholder="OTP"
                     placeholderTextColor="#95a5a6"
-                    onChangeText={text => onChangeemail(text)}
-                    value={email}
+                    onChangeText={text => setotp(text)}
+                    value={otp}
                 />
                 <TextInput
                     style={styles.formInputs}
@@ -83,37 +86,35 @@ export default function Login({ navigation }) {
                     value={password}
                     secureTextEntry={true}
                 />
-                <TouchableOpacity style={styles.formButton} onPress={login}>
+                <TextInput
+                    style={styles.formInputs}
+                    placeholder="Verify your Password"
+                    placeholderTextColor="#95a5a6"
+                    onChangeText={text => onChangeVr_Password(text)}
+                    value={vr_password}
+                    secureTextEntry={true}
+                />
+                <TouchableOpacity style={styles.formButton} onPress={reset}>
                     <View style={{ backgroundColor: "black", padding: "4%", borderRadius: 10 }}>
                         <FontAwesome5 name="arrow-right" size={20} color="white" />
                     </View>
                     <View style={{ padding: "4%", }}>
-                        <Text style={{ fontFamily: "Quicksand-Bold", fontSize: Dimensions.get('window').height / 40 }}>  Log in</Text>
+                        <Text style={{ fontFamily: "Quicksand-Bold", fontSize: Dimensions.get('window').height / 40 }}>  Reset</Text>
                     </View>
                 </TouchableOpacity>
-
-                <View style={styles.textButtonsContainer}>
-                    <Text style={styles.labels}>Don't have an account?</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                        <Text style={styles.textButton}>Sign up</Text>
-                    </TouchableOpacity>
-                </View>
-                <View >
-                    <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                        <Text style={styles.labels}>Forgot password?</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
         paddingHorizontal: '6%',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginTop: StatusBar.currentHeight
     },
     logo: {
         height: Dimensions.get('window').height / 4,
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
     },
     tagline: {
         fontFamily: "Quicksand-Bold",
-        fontSize: Dimensions.get('window').width / 10,
+        fontSize: Dimensions.get('window').width / 12,
     },
     form: {
         paddingTop: "6%"
