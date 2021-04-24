@@ -31,7 +31,7 @@ import smtplib
 
 port = 5000
 
-host = "192.168.1.14"
+host = "192.168.1.2"
 
 app = Flask(__name__)
 
@@ -195,7 +195,7 @@ def login():
 @app.route('/logout')
 def logout():
 
-    del session['admin_login'cm]
+    del session['admin_login']
     del session['admin_area']
     return redirect('/login')
 
@@ -206,7 +206,7 @@ def upload():
 
 
 @app.route('/hello/<send_mail>', methods=['GET', 'POST'])
-def predict(send_mail="no"):
+def predict(send_mail="yes"):
     send_mail_to = None
     grievance_all = list(mongo.db.grievance.find({"grievance_type": "unpredicted"}))
 
@@ -230,12 +230,12 @@ def predict(send_mail="no"):
             pred_class, pred_idx, outputs = learn.predict(img)
             print(str(pred_class))
             
-            if(str(pred_class) == "sewage"):
-                send_mail_to = "kunjshah45@gmail.com"
-            if(str(pred_class) == "garbage"):
-                send_mail_to = "kunjshah46@gmail.com"
-            if(str(pred_class) == "pothole"):
-                send_mail_to = "ramsuthar305@gmail.com"
+            if(str(pred_class) == "Sewage"):
+                send_mail_to = "tirth.hs@somaiya.edu"
+            if(str(pred_class) == "Garbage"):
+                send_mail_to = "sarvesh.bangad@somaiya.edu"
+            if(str(pred_class) == "Pothole"):
+                send_mail_to = "v.sunderraman@somaiya.edu"
             all1 = mongo.db.grievance.find_one_and_update({'grievance_id': i["grievance_id"]}, {
                 '$set': {"grievance_type": str(pred_class)}})
 
@@ -328,7 +328,7 @@ def reports():
     unsolved = [0] * 12
 
     for i in grievance_all:
-        if(i["grievance_type"] == "sewage"):
+        if(i["grievance_type"] == "Sewage"):
             # pothole.append(i["grievance_type"])
             date, time = i["assigned_date"].split(" ")
             year, month, day = date.split("-")
@@ -340,7 +340,7 @@ def reports():
             else:
                 solved[int(month)-1] += 1
 
-        if(i["grievance_type"] == "pothole"):
+        if(i["grievance_type"] == "Pothole"):
             # pothole.append(i["grievance_type"])
             date, time = i["assigned_date"].split(" ")
             year, month, day = date.split("-")
@@ -351,7 +351,7 @@ def reports():
                 unsolved[int(month)-1] += 1
             else:
                 solved[int(month)-1] += 1
-        if(i["grievance_type"] == "garbage"):
+        if(i["grievance_type"] == "Garbage"):
             # pothole.append(i["grievance_type"])
             date, time = i["assigned_date"].split(" ")
             year, month, day = date.split("-")
@@ -385,6 +385,7 @@ def index():
         if(session['admin_login']):
             last_id=None
             grievance_all = list(mongo.db.grievance.find())
+            grievance_all = grievance_all[::-1]
             page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
             total = len(grievance_all)
             pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
@@ -397,7 +398,7 @@ def index():
                     res = getLocationDetails(latitude, longitude)
                     update_location = mongo.db.grievance.find_one_and_update(
                         {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
-            return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination)
+            return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="info",b="light",c="light",first="index",second="solved",third="unsolved")
     except Exception as e: 
         CONTEXT_msg = ''
         return render_template("loginpage.html", CONTEXT_msg=CONTEXT_msg)
@@ -414,7 +415,11 @@ def solve(id1):
 @app.route("/userspecific/<id>")
 def userspecific(id):
     grievance_all = list(mongo.db.grievance.find({"user_id": id}))
-
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
     for i in grievance_all:
         if 'area' not in i or i['area'] == "unpredicted":
             longitude = float(i['longitude'])
@@ -422,59 +427,155 @@ def userspecific(id):
             res = getLocationDetails(latitude, longitude)
             update_location = mongo.db.grievance.find_one_and_update(
                 {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
-
-    return render_template('problems.html', all=grievance_all)
+   
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination)
 
 @app.route("/sewage")
 def sewage():
-    grievance_all = list(mongo.db.grievance.find({"grievance_type": "sewage"}))
-
-    for i in grievance_all:
-        if 'area' not in i or i['area'] == "unpredicted":
-            longitude = float(i['longitude'])
-            latitude = float(i['latitude'])
-            res = getLocationDetails(latitude, longitude)
-            update_location = mongo.db.grievance.find_one_and_update(
-                {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
-
-            grievance_all = list(mongo.db.grievance.find(
-                {"grievance_type": "sewage"}))
-    return render_template('problems.html', all=grievance_all)
+    grievance_all = list(mongo.db.grievance.find({"grievance_type": "Sewage"}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="info",b="light",c="light",first="sewage",second="solvedsewage",third="unsolvedsewage")
 
 
 @app.route("/garbage")
 def garbage():
     grievance_all = list(mongo.db.grievance.find(
-        {"grievance_type": "garbage"}))
-    for i in grievance_all:
-        if 'area' not in i or i['area'] == "unpredicted":
-            longitude = float(i['longitude'])
-            latitude = float(i['latitude'])
-            res = getLocationDetails(latitude, longitude)
-            update_location = mongo.db.grievance.find_one_and_update(
-                {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
+        {"grievance_type": "Garbage"}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
 
-            grievance_all = list(mongo.db.grievance.find(
-                {"grievance_type": "garbage"}))
-    return render_template('problems.html', all=grievance_all)
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="info",b="light",c="light",first="garbage",second="solvedgarbage",third="unsolvedgarbage")
 
 
 @app.route("/potholes")
 def potholes():
     grievance_all = list(mongo.db.grievance.find(
-        {"grievance_type": "pothole"}))
+        {"grievance_type": "Pothole"}))
+    grievance_all = grievance_all[::-1]
+    print("Hello",grievance_all)
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    print("How",pagination_users)
 
-    for i in grievance_all:
-        if 'area' not in i or i['area'] == "unpredicted":
-            longitude = float(i['longitude'])
-            latitude = float(i['latitude'])
-            res = getLocationDetails(latitude, longitude)
-            update_location = mongo.db.grievance.find_one_and_update(
-                {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="info",b="light",c="light",first="potholes",second="solvedpothole",third="unsolvedpothole")
 
-            grievance_all = list(mongo.db.grievance.find(
-                {"grievance_type": "potholes"}))
-    return render_template('problems.html', all=grievance_all)
+
+@app.route("/solved")
+def solved():
+    grievance_all = list(mongo.db.grievance.find(
+        {"status": "solved"}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="info",c="light",first="index",second="solved",third="unsolved")
+
+@app.route("/unsolved")
+def unsolved():
+    grievance_all = list(mongo.db.grievance.find(
+        {"status": "unsolved"}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="light",c="info",first="index",second="solved",third="unsolved")
+
+@app.route("/solvedgarbage")
+def solvedgarbage():
+    grievance_all = list(mongo.db.grievance.find({"$and":[{"status": "solved"},{"grievance_type": "Garbage"}]}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="info",c="light",first="garbage",second="solvedgarbage",third="unsolvedgarbage")
+
+@app.route("/unsolvedgarbage")
+def unsolvedgarbage():
+    grievance_all = list(mongo.db.grievance.find({"$and":[{"status": "unsolved"},{"grievance_type": "Garbage"}]}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="light",c="info",first="garbage",second="solvedgarbage",third="unsolvedgarbage")
+
+@app.route("/solvedpothole")
+def solvedpothole():
+    grievance_all = list(mongo.db.grievance.find({"$and":[{"status": "solved"},{"grievance_type": "Pothole"}]}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="info",c="light",first="potholes",second="solvedpothole",third="unsolvedpothole")   
+
+@app.route("/unsolvedpothole")
+def unsolvedpothole():
+    grievance_all = list(mongo.db.grievance.find({"$and":[{"status": "unsolved"},{"grievance_type": "Pothole"}]}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="light",c="info",first="potholes",second="solvedpothole",third="unsolvedpothole")   
+
+@app.route("/solvedsewage")
+def solvedsewage():
+    grievance_all = list(mongo.db.grievance.find({"$and":[{"status": "solved"},{"grievance_type": "Sewage"}]}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="info",c="light",first="sewage",second="solvedsewage",third="unsolvedsewage")
+
+@app.route("/unsolvedsewage")
+def unsolvedsewage():
+    grievance_all = list(mongo.db.grievance.find({"$and":[{"status": "unsolved"},{"grievance_type": "Sewage"}]}))
+    grievance_all = grievance_all[::-1]
+    page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+    total = len(grievance_all)
+    pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+    pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
+    return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination,a="light",b="light",c="info",first="sewage",second="solvedsewage",third="unsolvedsewage")
+
+def sendMail(to, subject, body):
+    gmail_user = 'vs062300@gmail.com'
+    gmail_password = 'qikpAx-keqgo3-guhmyr'
+
+    sent_from = gmail_user
+    #to = "singroleketan@gmail.com"
+    subject = subject
+    body = body
+
+    email_text = """From: %s\nTo: %s\nSubject: %s\n\n%s
+    """ % (sent_from, to, subject, body)
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(gmail_user, gmail_password)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+
+        print('Email sent!')
+        return 'Email sent!'
+    except Exception as e:
+        print('Something went wrong...'+str(e))
+        return 'Email not sent!'
+
 
 if __name__ == '__main__':
     app.run(host=host, port=port, debug=True)

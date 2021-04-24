@@ -125,6 +125,7 @@ export default function Toolbar({ cameraRef, navigation }) {
                                 <MaterialCommunityIcons name="account" size={30} color="white" />
                             </TouchableOpacity>
                         </Col>
+                    
                 }
             </Row>
         </Grid>);

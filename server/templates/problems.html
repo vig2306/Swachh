@@ -29,7 +29,7 @@
                   <b>
                   </b>
                   <span>
-                  <img src="{{ url_for('static',filename='images/logo-light-text.png" class="light-logo')}}" alt="Sahayak" /></span> </a>
+                  <img src="{{ url_for('static',filename='images/favicon.png')}}" class="light-logo" alt="Sahayak" /></span> </a>
                </div>
                <div class="navbar-collapse">
                   <ul class="navbar-nav mr-auto mt-md-0">
@@ -53,13 +53,27 @@
                   <div class="col-12 m-t-30">
                      <h4 class="m-b-0">Grievance Reports</h4>
                      <br/>
+                     
+                     <div class = "m-b-0 row">
+                        <form action="/{{first}}" method="GET" style="padding-left: 12px;">
+                          <button type="submit" class="btn btn-{{a}} " style="border-radius: 20px;">All</button>
+                        </form>
+                        <form action="/{{second}}" method="GET" style="padding-left: 20px;">
+                           <button type="submit" class="btn btn-{{b}} " style="border-radius: 20px;">Solved</button>
+                         </form>
+                        <form action="/{{third}}" method="GET" style="padding-left: 20px;">
+                          <button type="submit" class="btn btn-{{c}}" style="border-radius: 20px;">Unsolved</button>
+                        </form>
+                      </div>
+                      <br>
                   </div>
+                  
                   {% for i in all %}
                   <div class="col-md-6">
                      <div class="card card-outline-info">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col-md-6"><h4 class="m-b-0 text-white">{{i.grievance_type}}{{ loop.index + (page - 1) * per_page }}</h4></div>
+                                <div class="col-md-6"><h4 class="m-b-0 text-white">{{i.grievance_type}}</h4></div>
                                 <div class="col-md-6 text-white" style="text-align:right;"><span style='font-weight:bold;'>Uploaded by: </span><a href="/userspecific/{{i.user_id}}" style="color:white"> {{i.user_id}}</a></div>
                             </div>
                            
@@ -74,19 +88,19 @@
                                  <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                                  <div class='row'>
                                     {% if i.status=='solved' %}  
-                                    <div class="alert  alert-success col-md-5   py-2 text-center" role="alert">
+                                    <div class="alert  alert-success col-md-5   py-2 text-center" role="alert" style="align-items: center;justify-content: center;display: flex;">
                                        {{i.status}}
                                     </div>
                                     {% endif %}
                                     {% if i.status=='unsolved' %}  
-                                    <div class="alert  alert-danger col-md-5   py-2 text-center" style='width:80%;' role="alert">
+                                    <div class="alert  alert-danger col-md-5   py-2 text-center" style='width:80%;align-items: center;justify-content: center;display: flex;' role="alert">
                                        <a class='text-dark' href='/solve/{{i.grievance_id}}'>{{i.status}}</a>
                                     </div>
                                     {% endif %}
                                     <div class='col-md-1'>
                                     </div>
                                     <div class="alert  alert-info col-md-5  py-2 text-center" role="alert">
-                                       {{i.assigned_date}}
+                                       {{i.assigned_date[0:-10]}}
                                     </div>
                                  </div>
                               </div>
