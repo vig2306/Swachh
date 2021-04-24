@@ -26,13 +26,12 @@ from math import radians, cos, sin, asin, sqrt
 import herepy
 import ast
 from os.path import join, dirname, realpath
-
+from flask_paginate import Pagination, get_page_args
 
 port = 5000
-# host = "192.168.43.95"
-#host = "0.0.0.0"
-host = "192.168.1.4"
-# 192.168.68.103
+
+host = "192.168.1.14"
+
 app = Flask(__name__)
 
 app.config["MONGO_URI"] = "mongodb+srv://vignesh23:8oqq9WUNHGw2eSYo@jobcluster1.sal4m.mongodb.net/Swachh?retryWrites=true&w=majority"
@@ -142,7 +141,7 @@ def login():
 @app.route('/logout')
 def logout():
 
-    del session['admin_login']
+    del session['admin_login'cm]
     del session['admin_area']
     return redirect('/login')
 
@@ -330,30 +329,33 @@ def getLocationDetails(latitude, longitude):
 def index():
     try:
         if(session['admin_login']):
+            last_id=None
             grievance_all = list(mongo.db.grievance.find())
-
+            page, per_page, offset = get_page_args(page_parameter='page',per_page_parameter='per_page')
+            total = len(grievance_all)
+            pagination_users = get_users(grievance_all,offset=offset, per_page=per_page)
+            pagination = Pagination(page=page, per_page=per_page, total=total,css_framework='bootstrap4')
             for i in grievance_all:
                 print(i["area"])
-                if i['area'] == "unpredicted":
-                    
+                if i['area'] == "unpredicted":    
                     longitude = float(i['longitude'])
                     latitude = float(i['latitude'])
                     res = getLocationDetails(latitude, longitude)
                     update_location = mongo.db.grievance.find_one_and_update(
                         {'grievance_id': i["grievance_id"]}, {'$set': {"area": res}})
-
-            return render_template('problems.html', all=grievance_all)
+            return render_template('problems.html', all=pagination_users,page=page,per_page=per_page,pagination=pagination)
     except Exception as e: 
         CONTEXT_msg = ''
         return render_template("loginpage.html", CONTEXT_msg=CONTEXT_msg)
 
+def get_users(users,offset=0, per_page=6):
+    return users[offset: offset + per_page]
 
 @app.route('/solve/<id1>')
 def solve(id1):
     mongo.db.grievance.find_one_and_update(
         {'grievance_id': id1}, {'$set': {'status': 'solved'}})
     return redirect('/index')
-
 
 @app.route("/userspecific/<id>")
 def userspecific(id):
