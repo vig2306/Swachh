@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Colors from '../constants/colors';
-import { StyleSheet, SafeAreaView, Text, View, Image, TextInput, StatusBar, TouchableOpacity } from 'react-native';
+import { StyleSheet, SafeAreaView, Text, View, Image, TextInput, StatusBar, TouchableOpacity,ImageBackground } from 'react-native';
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+
+const image = { uri: "app/assets/images/resolved.png" };
 
 const EntryCard = ({ props }) => {
     const [dataLoaded, setDataLoaded] = useState(false);
@@ -41,6 +43,31 @@ const EntryCard = ({ props }) => {
 
             <TouchableOpacity>
                 <View style={styles.cardContainer}>
+                    { props.status == "solved" ?
+                    <View style={styles.textContainer}>
+                        <View style={styles.row}>
+                            <Image source={{ uri: props.image_link }}
+                                style={{ width: wp("78%"), height: wp("39%"), borderRadius: 10 }} />
+                            {/* <Text style={styles.userName}> Abdul Ansari</Text> */}
+                        </View>
+                        <ImageBackground source={require('../assets/images/resolved.png')} style={styles.image}>
+                            <View style={styles.row}>
+                                <Ionicons name="md-list-box" size={12} color="black" />
+                                <Text style={styles.flatNo}>  {props.grievance_type}  </Text>
+
+                            </View>
+
+                            <View style={styles.row}>
+                                <Entypo name="location" size={12} color="black" />
+                                <Text style={styles.flatNo}> {props.area}  </Text>
+                            </View>
+                            <View style={styles.row}>
+                                <SimpleLineIcons name="clock" size={11} color="black" />
+                                <Text style={styles.flatNo}> {props.assigned_date} </Text>
+                            </View>
+                        </ImageBackground>
+                    </View>
+                    :
                     <View style={styles.textContainer}>
                         <View style={styles.row}>
                             <Image source={{ uri: props.image_link }}
@@ -52,6 +79,7 @@ const EntryCard = ({ props }) => {
                             <Text style={styles.flatNo}>  {props.grievance_type}  </Text>
 
                         </View>
+
                         <View style={styles.row}>
                             <Entypo name="location" size={12} color="black" />
                             <Text style={styles.flatNo}> {props.area}  </Text>
@@ -59,16 +87,14 @@ const EntryCard = ({ props }) => {
                         <View style={styles.row}>
                             <SimpleLineIcons name="clock" size={11} color="black" />
                             <Text style={styles.flatNo}> {props.assigned_date} </Text>
-                        </View>
-
-                    </View>
+                        </View>                    
+                    </View>}
                 </View>
-
             </TouchableOpacity>
 
         );
     }
-}
+}   
 
 export default EntryCard;
 const styles = StyleSheet.create({
@@ -76,5 +102,11 @@ const styles = StyleSheet.create({
     textContainer: {},
     userName: { fontFamily: "Quicksand-Bold", fontSize: 20, paddingBottom: wp("0.8%") },
     flatNo: { fontFamily: "Quicksand-SemiBold" },
-    row: { flexDirection: "row", alignItems: "center", paddingBottom: wp("1%") }
+    row: { flexDirection: "row", alignItems: "center", paddingBottom: wp("1%") },
+    image: {
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "center",
+        borderRadius: 10,
+      },
 });

@@ -265,7 +265,7 @@ def distance(lat1, lat2, lon1, lon2):
 @app.route('/api/history/<email>', methods=['GET'])
 def history(email):
     grievance_all = list(mongo.db.grievance.find({"user_id": email}))
-
+    grievance_all = grievance_all[::-1]
     for i in grievance_all:
         if 'area' not in i or i['area'] == "unpredicted":
             longitude = float(i['longitude'])
@@ -410,6 +410,30 @@ def get_users(users,offset=0, per_page=6):
 def solve(id1):
     mongo.db.grievance.find_one_and_update(
         {'grievance_id': id1}, {'$set': {'status': 'solved'}})
+    grievance_all = list(mongo.db.grievance.find({'grievance_id': id1}))
+    for i in grievance_all:
+        to = i["user_id"]
+    print("Hello kfnkfnf",to)
+    gmail_user = 'vs062300@gmail.com'
+    gmail_password = 'qikpAx-keqgo3-guhmyr'
+
+    sent_from = gmail_user
+    #to = "singroleketan@gmail.com"
+    subject = "Grievance Solved"
+    body = "Your reported grievance has been solved,Thank you for your support."
+
+    email_text = """From: %s\nTo: %s\nSubject: %s\n\n%s
+    """ % (sent_from, to, subject, body)
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(gmail_user, gmail_password)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+        print('Email sent!')
+    except Exception as e:
+        print('Something went wrong...'+str(e))
     return redirect('/index')
 
 @app.route("/userspecific/<id>")
