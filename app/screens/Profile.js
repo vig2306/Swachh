@@ -112,8 +112,7 @@ export default function Profile({ navigation }) {
         try {
             const result = await Share.share({
                 message:
-                    "Sahayak is much better than MyGate in terms of UI. Thanks to Ram Suthar ;}",
-            });
+                    "Sahayak is a grivieance reporting APP please support us by sharing this app and reporting grivieances!!",});
             if (result.action === Share.sharedAction) {
                 if (result.activityType) {
                     // shared with activity type of result.activityType
@@ -127,7 +126,9 @@ export default function Profile({ navigation }) {
             alert(error.message);
         }
     };
-
+    const onSupport = async () => {
+        Linking.openURL('mailto:tirth.hs@somaiya.edu?');
+    }
     if (!dataLoaded) {
         return (
             <View>
@@ -238,10 +239,13 @@ export default function Profile({ navigation }) {
                         >
                             <Text style={styles.settingDivider}>{Texts.Profile.improve}</Text>
                         </View>
-                        <SettingCard
+                    <TouchableOpacity >
+                        <SettingCard custom_values={support_values} handlePress={onSupport}/>
+                    </TouchableOpacity>
+                        {/* <SettingCard
                             custom_values={support_values}
                             handlePress={setSupportModal}
-                        />
+                        /> */}
                         <SettingCard custom_values={share_values} handlePress={onShare} />
                     </View>
                     <View

@@ -64,19 +64,55 @@
                         <form action="/{{third}}" method="GET" style="padding-left: 20px;">
                           <button type="submit" class="btn btn-{{c}}" style="border-radius: 20px;">Unsolved</button>
                         </form>
+                        {% if c=='info' %}  
+                      <div class="dropdown" style="margin-left: auto;
+                      order: 2; padding-right: 18px;">
+                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Priority
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" href="/{{alpha}}">High</a>
+                          <a class="dropdown-item" href="/{{beta}}">Medium</a>
+                          <a class="dropdown-item" href="/{{gamma}}">Low</a>
+                        </div>
+                      </div>
+                      {% endif %}
                       </div>
                       <br>
+                      
                   </div>
                   
                   {% for i in all %}
                   <div class="col-md-6">
                      <div class="card card-outline-info">
+                        {% if i.priority== 2 and i.status== "unsolved"%}
+                        <div class="card-header" style="background-color: #f53a37;;">
+                            <div class="row">
+                                <div class="col-md-6"><h4 class="m-b-0 text-white">{{i.grievance_type}}</h4></div>
+                                <div class="col-md-6 text-white" style="text-align:right;"><span style='font-weight:bold;'>Uploaded by: </span><a href="/userspecific/{{i.user_id}}" style="color:white"> {{i.user_id}}</a></div>
+                            </div>
+                        {% endif %}
+                        {% if i.priority== 1 and i.status== "unsolved"%}
+                        <div class="card-header" style="background-color:orange;">
+                            <div class="row">
+                                <div class="col-md-6"><h4 class="m-b-0 text-white">{{i.grievance_type}}</h4></div>
+                                <div class="col-md-6 text-white" style="text-align:right;"><span style='font-weight:bold;'>Uploaded by: </span><a href="/userspecific/{{i.user_id}}" style="color:white"> {{i.user_id}}</a></div>
+                            </div>
+                        {% endif %}
+                        {% if i.priority== 0 and i.status== "unsolved" %}
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-md-6"><h4 class="m-b-0 text-white">{{i.grievance_type}}</h4></div>
                                 <div class="col-md-6 text-white" style="text-align:right;"><span style='font-weight:bold;'>Uploaded by: </span><a href="/userspecific/{{i.user_id}}" style="color:white"> {{i.user_id}}</a></div>
                             </div>
-                           
+                        {% endif %}
+                        {% if i.status == "solved"%}
+                        <div class="card-header" style="background-color:green;">
+                            <div class="row">
+                                <div class="col-md-6"><h4 class="m-b-0 text-white">{{i.grievance_type}}</h4></div>
+                                <div class="col-md-6 text-white" style="text-align:right;"><span style='font-weight:bold;'>Uploaded by: </span><a href="/userspecific/{{i.user_id}}" style="color:white"> {{i.user_id}}</a></div>
+                            </div>
+                        {% endif %}
                         </div>
                         <div class="card-block">
                            <div class="row">
@@ -85,7 +121,6 @@
                               </div>
                               <div class="col-md-8">
                                  <h3 class="card-title">{{ i.area }}</h3>
-                                 <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                                  <div class='row'>
                                     {% if i.status=='solved' %}  
                                     <div class="alert  alert-success col-md-5   py-2 text-center" role="alert" style="align-items: center;justify-content: center;display: flex;">
@@ -165,7 +200,7 @@
                </div>
             </div>
             <footer class="footer">
-               © 2019 Sahayak
+               © 2021 Sahayak
             </footer>
          </div>
       </div>
