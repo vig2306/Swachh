@@ -6,15 +6,15 @@ platform or system to make complaints about the issues and these problems remain
 unaddressed. Sometimes even if a person approaches the local authorities the problems are
 unheard and there is no record of the complaint.
 
-## What is Sahayak?
-* Sahayak is an AI Enabled citizen grievance monitoring and response system
+## What is Swachh?
+* Swachh is an AI Enabled citizen grievance monitoring and response system
 for reporting grievances observed and faced by local people in their day
 to day life.
 * Its one click grievance reporting system which will be fed with pictures
 of different problems such as garbage spill, potholes, no parkings, stray
 dogs etc. with its location to an AI model which will classify the category
 of the problems and assigns task to respected authorities.
-* Using Data Analysis and Data visualization Sahayak provides a
+* Using Data Analysis and Data visualization Swachh provides a
 dashboard to get visual reports of their area weekly, monthly, annually
 using different graphs and data visualization techniques which can be
 viewed by the authorities as well as by the normal users so there will a
@@ -32,7 +32,7 @@ transparent process and complaints can be tracked.
 
 1. Clone the repo
 ```sh
-   https://github.com/vig2306/Sahayak-Mip.git
+   https://github.com/vig2306/Swachh.git
 ```
 
 2. Add the required libraries using pip for the server side
@@ -55,4 +55,3 @@ transparent process and complaints can be tracked.
 ```sh
    python runner.py
 ```
-
